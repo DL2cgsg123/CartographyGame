@@ -1,0 +1,23 @@
+{
+  "name": "final",
+  "version": "1.0.0",
+  "description": "",
+  "main": "main.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@rollup/plugin-commonjs": "^25.0.1",
+    "@rollup/plugin-eslint": "^9.0.4",
+    "@rollup/plugin-node-resolve": "^15.1.0",
+    "mapbox": "^1.0.0-beta10",
+    "mapbox-gl": "^2.15.0",
+    "rollup": "^3.25.1",
+    "rollup-plugin-string": "^3.0.0"
+  },
+  "devDependencies": {
+    "eslint": "^8.43.0"
+  }
+}
