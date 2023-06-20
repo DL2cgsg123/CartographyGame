@@ -1,0 +1,2 @@
+[out:json];
+relation["boundary"="administrative"]["admin_level"="2"]["name:en"="
