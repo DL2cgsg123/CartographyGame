@@ -37,8 +37,8 @@ window.addEventListener("load", () => {
                 window.map.setLayoutProperty(layer.id, "visibility", "none");
             }
         });
-        //window.player = new player();
-        //window.player.connect();
+        window.player = new player();
+        window.player.connect();
     });
 
     //let lastLayerName;
