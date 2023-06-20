@@ -21,7 +21,7 @@ window.addEventListener("load", () => {
             'type': 'geojson',
             'data': 'https://d2ad6b4ur7yvpq.cloudfront.net/naturalearth-3.3.0/ne_50m_admin_0_countries.geojson'
         });
-    
+
         window.map.addLayer({
             'id': 'states-layer',
             'type': 'fill',
@@ -31,12 +31,12 @@ window.addEventListener("load", () => {
                 'fill-outline-color': 'rgba(0, 0, 0, 0)'
             }
         });
-
         window.map.style.stylesheet.layers.forEach(function(layer) {
             if (layer.type === 'symbol') {
                 window.map.setLayoutProperty(layer.id, "visibility", "none");
             }
         });
+
         window.player = new player();
         window.player.connect();
     });

@@ -1,10 +1,11 @@
 //import mapboxgl from 'mapbox-gl';
 import overpassStart from "./overpass-start.txt"
 import overpassEnd from "./overpass-end.txt"
+//import turf from 'turf'
 
-export async function addCountryContour(countryName, color) {
+export async function addCountryContour(countryName, color) {//, labelsFlag) {
     if (window.map.getLayer(countryName) != undefined) {
-        window.map.setPaintProperty(countryName,  'line-color', color);
+        window.map.setPaintProperty(countryName,  'line-color', color); // !!! lable
         return;
     }
     const api = await fetch('https://www.overpass-api.de/api/interpreter?', {
@@ -22,8 +23,10 @@ export async function addCountryContour(countryName, color) {
         data: {
             type: 'FeatureCollection',
             features: []
-        }
+        },
     };
+    let Pn = 0;
+    let LonSum = 0.0, LatSum = 0.0;
 
     for (let member of answer.elements[0].members) {
         if (member.geometry === undefined) {
@@ -31,7 +34,6 @@ export async function addCountryContour(countryName, color) {
         }
         const feature = {
             type: 'Feature',
-            properties: {},
             geometry: {
                 type: 'LineString',
                 coordinates: [
@@ -39,13 +41,16 @@ export async function addCountryContour(countryName, color) {
             }
         };
         const coords = feature.geometry.coordinates;
-
+        
         for (let p of member.geometry) {
             coords.push([p.lon, p.lat])
+            Pn++;
+            LonSum += p.lon;
+            LatSum += p.lat;
         }
         lines.data.features.push(feature);
     }
-    window.map.addSource(countryName, lines);
+    window.map.addSource(countryName, lines); 
     window.map.addLayer({
         'id': countryName,
         'type': 'line',
@@ -59,4 +64,37 @@ export async function addCountryContour(countryName, color) {
             'line-color': color,
         }
     });
+
+
+    map.addSource(countryName + 'Text', {
+        'type': 'geojson',
+        'data': {
+            'type': 'FeatureCollection',
+            'features': [{
+                'type': 'Feature',
+                'geometry': {
+                    'type': 'Point',
+                    'coordinates': [LonSum / Pn, LatSum / Pn]
+                }
+            }]
+        }
+    });
+
+    /*
+    window.map.addLayer({
+        'id': countryName + "Text",
+        'type': 'symbol',
+        'source': countryName + 'Text',
+        'layout': {
+            //'symbol-placement': 'line-center',
+            'text-field': 'AAAAAAAAAAAAAA',
+            //'text-justify': 'center',
+            //'text-anchor': 'center',
+            //'text-size': 20,
+        },
+        'paint': {
+            'text-color': '#888',
+        }
+    });
+    */
 }

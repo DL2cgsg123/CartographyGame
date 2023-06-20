@@ -15,7 +15,8 @@
     "mapbox": "^1.0.0-beta10",
     "mapbox-gl": "^2.15.0",
     "rollup": "^3.25.1",
-    "rollup-plugin-string": "^3.0.0"
+    "rollup-plugin-string": "^3.0.0",
+    "turf": "^3.0.14"
   },
   "devDependencies": {
     "eslint": "^8.43.0"
