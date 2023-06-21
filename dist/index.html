@@ -1,8 +1,110 @@
 <!DOCTYPE html>
 <head>
   <link href="https://api.mapbox.com/mapbox-gl-js/v2.15.0/mapbox-gl.css" rel="stylesheet">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Fira+Sans&family=Kanit:ital,wght@0,400;1,300&display=swap" rel="stylesheet">
+
+  <style>
+    body { margin: 0; padding: 0; }
+    #map { position: absolute; top: 0; bottom: 0; width: 100%; }
+
+    #dark {
+      background: rgba(102, 102, 102, 0.5);
+      width: 100%;
+      height: 100%;
+      position: absolute;
+      top: 0;
+      left: 0;
+      display: none;
+    }
+
+    #window {
+      width: 450px;
+      height: 300px;
+      text-align: center;
+      padding: 15px;
+      border: 3px solid rgb(82, 90, 104);
+      background: #efefef;
+      font-family: 'Medula One', sans-serif;
+      border-radius: 15px;
+      color: rgb(82, 90, 104);
+      position: absolute;
+      top: 0;
+      right: 0;
+      bottom: 0;
+      left: 0;
+      margin: auto;
+    }
+
+    #dark:target {
+        display: block;
+      }
+
+      .close {
+        display: inline-block;
+        border: 1px solid rgb(82, 90, 104);
+        color: rgb(82, 90, 104);
+        padding: 0 12px;
+        margin: 10px;
+        font-family: Open Sans;
+        font-weight: 700;
+        letter-spacing: .1em;
+        text-decoration: none;
+        background: #f2f2f2;
+        font-size: 20pt;
+        cursor: pointer;
+      }
+
+      .close:hover {
+        background: #e6e6ff;
+      }
+
+    #menu {
+      position: absolute;
+      text-align: center;
+      background: #ffffff;
+      border-radius: 25px;
+      margin-top: 12px;
+      margin-left: 12px;
+      border-color: #2f4d6c;
+      opacity: 0.9;
+    }
+    #country {
+      text-align: left;
+      margin-left: 20px;
+      margin-right: 20px;
+      margin-top: 6px;
+      margin-bottom: 6px;
+      font-family: 'Fira Sans', sans-serif;
+      font-family: 'Kanit', sans-serif;
+      color: #2f4d6c;
+      text-shadow: 2px 2px rgba(47, 77, 108, 0.1);
+    }
+  </style>
+
+<script src="main.js"></script>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.6.4/jquery.min.js"></script>
+<script>
+ function init() {
+    document.getElementById('country').style.visibility = "hidden";
+    $(location).attr('href', "#dark");
+ }
+</script>
+
 </head>
-<body>
-  <script src="main.js"></script>
+<body onload="init();">
   <div id="map" style="width: 1024px; height: 1024px"></div>
+
+  <div id="menu">
+    <h2 id="country"></h2>
+  </div>
+ 
+  <div id="dark">
+    <div id="window">
+        Pam Pam Pam<br>Pam Pam<br>Paaaam!!!<br>Yor score: ...<br>Paaaaaaaaaaaaaam!
+        <br>
+        <a href="#" class="close">Close</a>
+    </div>
+  </div>
 </body>

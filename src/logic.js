@@ -2,6 +2,7 @@ import mapboxgl from 'mapbox-gl';
 import {countryList} from './countries.js'
 import {addCountryContour} from './drawing.js'
 import {convertionCountries} from './countries_convertion.js'
+import {countriesScore} from './score.js'
 
 const stateStart = 0;
 const stateWaitForAnsw = 1;
@@ -14,10 +15,11 @@ export class player {
         this.score = 0;
         this.prevCountriesList = [];
         this.answNum = 0;
+        this.unguessedCountries = countryList.slice();
     }
 
     #getRandCountry() {
-        return countryList[Math.floor(Math.random() * countryList.length)];
+        return this.unguessedCountries[Math.floor(Math.random() * this.unguessedCountries.length)];
     }
 
     waitForAnsw(e) {
@@ -27,48 +29,63 @@ export class player {
         if (!features.length) {
             return;
         }
-        console.log("Your current answer: " + features[0].properties.name);
+        if (convertionCountries[features[0].properties.iso_a2] == undefined)
+            console.log("Your current answer: " + features[0].properties.name)
+        else
+            console.log("Your current answer: " + convertionCountries[features[0].properties.iso_a2]);
 
         let color;
         if (features[0].properties.iso_a2 === this.curCountry) {
-            this.state = stateWin;
             color = "rgba(0, 255, 0, 1)";
-            addCountryContour(features[0].properties.name, color);
-            this.prevCountriesList.push(features[0].properties.name);
-            this.connect();
-            return;
+            addCountryContour(features[0].properties.iso_a2, color).then(() => {
+                this.state = stateWin;
+                this.prevCountriesList.push(features[0].properties.iso_a2);
+                this.unguessedCountries.splice(this.unguessedCountries.indexOf(this.curCountry), 1);
+                this.connect();
+                return;
+            });
         }
         else {
-            new mapboxgl.Popup({ closeOnClick: false })
-                .setLngLat(e.lngLat)
-                .setHTML(features[0].properties.name)
-                .addTo(window.map);
-            if (this.answNum >= 2) {
-                this.state = stateLose;
-                this.connect();
-                return; // fix
-            }
-            else
-                this.answNum++;
-            this.prevCountriesList.push(features[0].properties.name);
             color = "rgba(255, 0, 0, 1)";
+            if (this.prevCountriesList.indexOf(features[0].properties.iso_a2) != -1)
+                return;
+            addCountryContour(features[0].properties.iso_a2, color).then(() => {
+                new mapboxgl.Popup({ closeOnClick: false })
+                .setLngLat(e.lngLat)
+                .setHTML(features[0].properties.name)   
+                .addTo(window.map);
+                this.prevCountriesList.push(features[0].properties.iso_a2);    
+                if (this.answNum >= 2) {
+                    this.state = stateLose;
+                    this.unguessedCountries.splice(this.unguessedCountries.indexOf(this.curCountry), 1);
+                    this.connect();
+                    return;
+                }
+                else
+                    this.answNum++;
+            });
         }
-        addCountryContour(features[0].properties.name, color);//, true);
+    }
+
+    #clearPrevCountries(prevCountriesList) {
+        prevCountriesList.forEach((countryNameISOA2) => {
+            window.map.setLayoutProperty(countryNameISOA2, 'visibility', 'none');
+        });
     }
 
     connect() {
         switch (this.state) {
             case stateStart:
                 this.curCountry = this.#getRandCountry();
-                console.log("Your new task: " + convertionCountries[this.curCountry]); // add render  
+                document.getElementById('country').innerHTML = "Task: " + convertionCountries[this.curCountry];
+                if (document.getElementById('country').style.visibility === "hidden")
+                    document.getElementById('country').style.visibility = 'visible';
                 this.state = stateWaitForAnsw;
                 window.map.on('click', (e) => {this.waitForAnsw(e)});
                 return;
             case stateLose:
                 console.log("You lose :(((("); // add render
-                this.prevCountriesList.forEach((countryName) => {
-                    window.map.setPaintProperty(countryName, 'line-color', "rgba(0, 0, 0, 0)");
-                });
+                setTimeout(this.#clearPrevCountries, 2500, this.prevCountriesList);
                 this.curCountry = undefined;
                 this.prevCountriesList = [];
                 this.answNum = 0;
@@ -78,14 +95,13 @@ export class player {
                 return;
             case stateWin:
                 console.log("You win !!! :)))"); // add render
-                this.prevCountriesList.forEach((countryName) => {
-                    window.map.setPaintProperty(countryName, 'line-color', "rgba(0, 0, 0, 0)");
-                });
-                this.curCountry = undefined;
+                setTimeout(this.#clearPrevCountries, 3000, this.prevCountriesList);
                 this.prevCountriesList = [];
                 this.answNum = 0;
                 this.state = stateStart;
-                this.score++; // ?
+                this.score += countriesScore[this.curCountry];
+                console.log("!!Your score: " + this.score);
+                this.curCountry = undefined;
                 window.map.on('click', null);
                 this.connect();
                 return;
