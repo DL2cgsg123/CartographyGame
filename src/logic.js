@@ -81,12 +81,14 @@ export class player {
     }
 
     #addLoseWindow(){
-        if ($('#window').children().) {
+        /*
+        if (!$('#window').children().length) {
             let info = `<p id="window_lose_text">` + "You lose!" + `</p><a href="#" class="close">Close</a>`;
             let el = $(info);
             $('#window').append(el);
+            $(location).attr('href', "#dark");
         }
-        $(location).attr('href', "#dark");
+        */
     }
 
     connect() {
@@ -107,7 +109,7 @@ export class player {
                 this.answNum = 0;
                 this.state = stateStart;
                 window.map.on('click', null);
-                //this.#addLoseWindow();
+                this.#addLoseWindow();
                 this.connect();
                 return;
             case stateWin:
