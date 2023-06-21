@@ -3,6 +3,7 @@ import {countryList} from './countries.js'
 import {addCountryContour} from './drawing.js'
 import {convertionCountries} from './countries_convertion.js'
 import {countriesScore} from './score.js'
+import $ from 'jquery'
 
 const stateStart = 0;
 const stateWaitForAnsw = 1;
@@ -73,6 +74,21 @@ export class player {
         });
     }
 
+    #addWinWindow(){
+        let info = `<p>` + "You win!\nYour Current Score: " + this.score + `</p><a href="#" class="close">Close</a>`;
+        $("#window").append(info);
+        $(location).attr('href', "#dark");
+    }
+
+    #addLoseWindow(){
+        if ($('#window').children().) {
+            let info = `<p id="window_lose_text">` + "You lose!" + `</p><a href="#" class="close">Close</a>`;
+            let el = $(info);
+            $('#window').append(el);
+        }
+        $(location).attr('href', "#dark");
+    }
+
     connect() {
         switch (this.state) {
             case stateStart:
@@ -91,6 +107,7 @@ export class player {
                 this.answNum = 0;
                 this.state = stateStart;
                 window.map.on('click', null);
+                //this.#addLoseWindow();
                 this.connect();
                 return;
             case stateWin:
@@ -103,6 +120,7 @@ export class player {
                 console.log("!!Your score: " + this.score);
                 this.curCountry = undefined;
                 window.map.on('click', null);
+                //this.#addWinWindow();
                 this.connect();
                 return;
         }
