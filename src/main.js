@@ -1,14 +1,16 @@
 import mapboxgl from 'mapbox-gl';
 import {player} from './logic.js'
 
+import $ from 'jquery'
+
 window.addEventListener("load", () => {
+    $(location).attr('href', "#");
     mapboxgl.accessToken = 'pk.eyJ1IjoiYWxla3NlaS1hLXIiLCJhIjoiY2xpeWNkbDZ0MGd4bjNkbzFxYzZzOTRjaSJ9.OTXez9jXEokdDh5WEL8lIQ';
     window.map = new mapboxgl.Map({
         container: 'map', // container ID
         style: 'mapbox://styles/mapbox/streets-v12', // style URL
-        center: [30, 59], // starting position [lng, lat]
-        zoom: 5, // starting zoom
-        minzoom: 4.2,
+        center: [19.353150126328785, 49.5382110117873], // starting position [lng, lat]
+        zoom: 1.72, // starting zoom
     });
 
     window.map.on("load", () => { 
@@ -33,6 +35,57 @@ window.addEventListener("load", () => {
         });
 
         window.player = new player();
-        window.player.connect();
+        document.getElementById('score-text').innerHTML = "Score: 0";
+        document.getElementById('score').style.visibility = "visible";
+        document.getElementById('space').style.visibility = "visible";
+         /*
+        let newPlayer = {
+            name: "A",
+            score: 447,
+        };
+        submit_player(newPlayer);
+        */
+       window.player.connect();
+       /*
+       get_leaders().then((text) => {
+        console.log("AAA" + text);
+       });
+        get_leaders().then((res) =>{
+            leadersData = tmp.split(';');
+        leadersData.forEach((leaderData, ind) => {
+            let leader = document.getElementById("leader" + (ind + 1));
+            let data = leaderData.split(':');
+            leader.innerHTML = data[0] + ': ' + data[1];
+        });
+        }),
+        */
     });
 })
+
+function submit_player(Player) {
+    console.log("Start");
+    fetch('/', {
+        method: 'POST',
+        body: Player.name + ':' + Player.score,
+    });
+}
+
+async function get_leaders() {
+    fetch('/a', {
+        method: 'GET'
+    })
+        .then(response => {
+            return response.text();
+        })
+        .then(text => {
+            console.log(text);
+        });
+}
+
+let newPlayer = {
+    name: "A",
+    score: 447,
+};
+
+//submit_player(newPlayer);
+//get_leaders();

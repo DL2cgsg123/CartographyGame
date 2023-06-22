@@ -20,6 +20,8 @@ export class player {
     }
 
     #getRandCountry() {
+        if (!this.unguessedCountries || this.unguessedCountries.length < 1)
+            return undefined;
         return this.unguessedCountries[Math.floor(Math.random() * this.unguessedCountries.length)];
     }
 
@@ -30,14 +32,9 @@ export class player {
         if (!features.length) {
             return;
         }
-        if (convertionCountries[features[0].properties.iso_a2] == undefined)
-            console.log("Your current answer: " + features[0].properties.name)
-        else
-            console.log("Your current answer: " + convertionCountries[features[0].properties.iso_a2]);
-
         let color;
         if (features[0].properties.iso_a2 === this.curCountry) {
-            color = "rgba(0, 255, 0, 1)";
+            color = "rgba(0, 255, 0, 0.6)";
             addCountryContour(features[0].properties.iso_a2, color).then(() => {
                 this.state = stateWin;
                 this.prevCountriesList.push(features[0].properties.iso_a2);
@@ -47,12 +44,13 @@ export class player {
             });
         }
         else {
-            color = "rgba(255, 0, 0, 1)";
+            color = "rgba(255, 0, 0, 0.6)";
             if (this.prevCountriesList.indexOf(features[0].properties.iso_a2) != -1)
                 return;
             addCountryContour(features[0].properties.iso_a2, color).then(() => {
-                new mapboxgl.Popup({ closeOnClick: false })
+                new mapboxgl.Popup({  closeOnClick: false, className: "popup" })
                 .setLngLat(e.lngLat)
+                //.setHTML('<h3 style="font-family: `Fira Sans`, sans-serif;font-family: `Kanit`, sans-serif;color=#2f6c2f">' + features[0].properties.name + '</h3>')   
                 .setHTML(features[0].properties.name)   
                 .addTo(window.map);
                 this.prevCountriesList.push(features[0].properties.iso_a2);    
@@ -74,59 +72,54 @@ export class player {
         });
     }
 
-    #addWinWindow(){
-        let info = `<p>` + "You win!\nYour Current Score: " + this.score + `</p><a href="#" class="close">Close</a>`;
-        $("#window").append(info);
+    #addWindow(text){
+        let curWindow = $('#window');
+        if (curWindow.children().length)
+            curWindow.empty(); 
+        //let text = isWin ?  : "You lose";
+        //curWindow.append($(`<p id="window_lose_text">` + text + `</p>`));
+        //$('#darc').onclick = () => {$('#window').empty(); $(location).attr('href', '#')};
+        curWindow.append($(`<a href="#" class="close"></a><p id="window_lose_text" onclick=>` + text + `</p>`));
         $(location).attr('href', "#dark");
-    }
-
-    #addLoseWindow(){
-        /*
-        if (!$('#window').children().length) {
-            let info = `<p id="window_lose_text">` + "You lose!" + `</p><a href="#" class="close">Close</a>`;
-            let el = $(info);
-            $('#window').append(el);
-            $(location).attr('href', "#dark");
-        }
-        */
     }
 
     connect() {
         switch (this.state) {
             case stateStart:
                 this.curCountry = this.#getRandCountry();
+                if (this.curCountry == undefined) {
+                    this.#addWindow("That's All!Your final score: " + this.score);
+                    return;
+                }
                 document.getElementById('country').innerHTML = "Task: " + convertionCountries[this.curCountry];
-                if (document.getElementById('country').style.visibility === "hidden")
-                    document.getElementById('country').style.visibility = 'visible';
+                if (document.getElementById('menu').style.visibility === "hidden")
+                    document.getElementById('menu').style.visibility = 'visible';
                 this.state = stateWaitForAnsw;
                 window.map.on('click', (e) => {this.waitForAnsw(e)});
+                //console.log(get_leaders());
                 return;
             case stateLose:
-                console.log("You lose :(((("); // add render
                 setTimeout(this.#clearPrevCountries, 2500, this.prevCountriesList);
                 this.curCountry = undefined;
                 this.prevCountriesList = [];
                 this.answNum = 0;
                 this.state = stateStart;
                 window.map.on('click', null);
-                this.#addLoseWindow();
+                this.#addWindow("You lose");
                 this.connect();
                 return;
             case stateWin:
-                console.log("You win !!! :)))"); // add render
                 setTimeout(this.#clearPrevCountries, 3000, this.prevCountriesList);
                 this.prevCountriesList = [];
                 this.answNum = 0;
                 this.state = stateStart;
                 this.score += countriesScore[this.curCountry];
-                console.log("!!Your score: " + this.score);
+                document.getElementById('score-text').innerHTML = "Score: " + this.score;
                 this.curCountry = undefined;
                 window.map.on('click', null);
-                //this.#addWinWindow();
+                this.#addWindow("&#9733;" + "You win!" + "&#9733;");
                 this.connect();
                 return;
         }
     }
 }
-
-// !!! ISO3166-1:alpha2

@@ -15,6 +15,7 @@
     "jquery": "^3.7.0",
     "mapbox": "^1.0.0-beta10",
     "mapbox-gl": "^2.15.0",
+    "mongodb": "^5.6.0",
     "rollup": "^3.25.1",
     "rollup-plugin-string": "^3.0.0",
     "turf": "^3.0.14"
