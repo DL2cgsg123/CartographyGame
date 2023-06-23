@@ -21,6 +21,7 @@ async function run() {
         console.log("Start of connection");
         const results = await collection.find().toArray();
         console.log(results);
+        //await collection.drop();
     }catch(err) {
         console.log(err);
     }
@@ -33,7 +34,9 @@ async function addPlayer(newPlayer) {
 
     try {
         console.log("Adding");
-        collection.insertOne({ name: newPlayer.name, score: newPlayer.score });
+        const result = await collection.findOneAndUpdate({name: newPlayer.name}, { $set: {score: newPlayer.score}});
+        if (result.value == null)
+            await collection.insertOne({ name: newPlayer.name, score: newPlayer.score });
         return true;
     }
     catch (err) {
@@ -77,10 +80,10 @@ async function checkPlayer(newPlayer) {
 async function getLeaders() {
     leaders = await collection.find().toArray();
     leaders.sort(function (a, b) {
-        if (a.score > b.score) {
+        if (a.score < b.score) {
             return 1;
         }
-        if (a.score < b.score) {
+        if (a.score > b.score) {
             return -1;
         }
         return 0;
@@ -105,46 +108,81 @@ const requestListener = function (req, res) {
     let fileName;
     let contentType;
 
-    console.log(req.method, req.url);
-    if (req.url === "/") {
-        fileName = "dist/index.html";
-        contentType = "text/html";
-    }
-    else if (req.url.endsWith(".css")) {
-        fileName = req.url.substr(1);
-        contentType = "text/css";
-    }
-    else if (req.url.endsWith(".js")) {
-        fileName = "dist/" + req.url.substr(1);
-        contentType = "text/javascript";
-    }
-    else if (req.url.endsWith(".ico")) {
-        return;
-    }
-    else if (req.method === 'GET' && req.url == '/a') {
-        res.writeHead(200);
-        getOutLeaders().then(() => {
-            res.end(outLeaders);
+    console.log(typeof req.method, req.method, req.url);
+    if (req.method == "GET") {
+        if (req.url === "/") {
+            fileName = "dist/index.html";
+            contentType = "text/html";
+        }
+        else if (req.url.endsWith(".css")) {
+            fileName = req.url.substr(1);
+            contentType = "text/css";
+        }
+        else if (req.url.endsWith(".js")) {
+            fileName = "dist/" + req.url.substr(1);
+            contentType = "text/javascript";
+        }
+        else if (req.url.endsWith(".ico")) {
+            res.writeHead(404)
+            res.end()
+            return;
+        }
+        else if (req.method === 'GET' && req.url == '/a') {
+            res.writeHead(200);
+            getOutLeaders().then(() => {
+                res.end(outLeaders);
 
-            fs.readFile(`${__dirname}/${fileName}`)
-                .then(contents => {
-                    res.setHeader("Content-Type", contentType);
-                    res.writeHead(200);
-                    res.end(contents);
-                })
-                .catch(err => {
-                    console.log("121");
-                    res.writeHead(500);
-                    res.end(err.message);
-                    return;
-                });
+                fs.readFile(`${__dirname}/${fileName}`)
+                    .then(contents => {
+                        res.setHeader("Content-Type", contentType);
+                        res.writeHead(200);
+                        res.end(contents);
+                    })
+                    .catch(err => {
+                        console.log("121");
+                        res.writeHead(500);
+                        res.end(err.message);
+                        return;
+                    });
+            });
+        }
+        else {
+            console.log("109");
+            res.writeHead(404);
+            res.end("Not found");
+            return;
+        }
+    } else if (req.method == "POST") {
+        let data = "";
+        console.log("Start");
+        req.on('data', chunk => {
+            data += chunk;
         });
-    }
-    else {
-        console.log("109");
-        res.writeHead(500);
-        res.end("Error, unsupported");
-        return;
+        req.on('end', () => {
+            console.log(data);
+            
+            /*let i = 0;
+            while (data[i] != ':')
+                i++;
+            let newPlayer = {
+                name: data.substr(0, i),
+                score: parseInt(data.substr(i + 1, data.length)),
+            };
+            checkPlayer(newPlayer);*/
+
+            data = JSON.parse(data);
+
+            console.log(data);
+
+            let newPlayer = {
+                name: data.name,
+                score: data.score,
+            };
+            checkPlayer(newPlayer);
+
+            res.writeHead(200)
+            res.end()
+        });
     }
 
     if (req.method != 'GET' || req.url != '/a') {
@@ -160,25 +198,6 @@ const requestListener = function (req, res) {
                 res.end(err.message);
                 return;
             });
-    }
-    
-    if (req.method === 'POST') {
-        let data = "";
-
-        req.on('data', chunk => {
-            data += chunk;
-        });
-        req.on('end', () => {
-            console.log(data);
-            let i = 0;
-            while (data[i] != ':')
-                i++;
-            let newPlayer = {
-                name: data.substr(0, i),
-                score: parseInt(data.substr(i + 1, data.length)),
-            };
-            checkPlayer(newPlayer);
-        });
     }
 };
 

@@ -1,5 +1,5 @@
 import mapboxgl from 'mapbox-gl';
-import {player} from './logic.js'
+import {player, get_leaders} from './logic.js'
 
 import $ from 'jquery'
 
@@ -45,6 +45,7 @@ window.addEventListener("load", () => {
         };
         submit_player(newPlayer);
         */
+       get_leaders();
        window.player.connect();
        /*
        get_leaders().then((text) => {
@@ -62,30 +63,12 @@ window.addEventListener("load", () => {
     });
 })
 
-function submit_player(Player) {
-    console.log("Start");
-    fetch('/', {
-        method: 'POST',
-        body: Player.name + ':' + Player.score,
-    });
-}
-
-async function get_leaders() {
-    fetch('/a', {
-        method: 'GET'
-    })
-        .then(response => {
-            return response.text();
-        })
-        .then(text => {
-            console.log(text);
-        });
-}
-
+/*
 let newPlayer = {
-    name: "A",
-    score: 447,
+    name: "CGSG",
+    score: 102,
 };
 
-//submit_player(newPlayer);
+submit_player(newPlayer);
+*/
 //get_leaders();
